@@ -8,6 +8,7 @@ def main():
     server_socket = socket.create_server((HOST, PORT))
 
     print(f"Server listening on {HOST}:{PORT}")
+    
 
     while True:
         client_socket, address = server_socket.accept()
@@ -15,9 +16,16 @@ def main():
         print(f"Client connected: {address}")
 
         request = client_socket.recv(1024).decode()
-
         print("Raw request:")
         print(request)
+
+        request_parts = request.split("\r\n\r\n", 1)
+        if len(request_parts) == 2:
+            request_body = request_parts[1]
+        else:
+            request_body = ""
+        
+        print(f"Request Body: {request_body}")
 
         lines = request.splitlines()
 
@@ -85,11 +93,22 @@ def main():
         # POST ROUTES
         
         elif method == "POST":
+            if path.startswith("/files/"):
+                filename = path[len("/files/"):]
+                filepath = "files/" + filename
+                try:
+                    with open(filepath, "w") as f:
+                        f.write(request_body)
 
-            status_line = b"HTTP/1.1 501 Not Implemented\r\n"
-            body = b"POST not implemented yet"
+                    status_line = b"HTTP/1.1 201 Created\r\n"
+                    body = b"File created successfully"
 
-        
+                except OSError:
+                    status_line = b"HTTP/1.1 500 Internal Server Error\r\n"
+                    body = b"Failed to write file"
+            else:
+                status_line = b"HTTP/1.1 404 Not Found\r\n"
+                body = b"404 Not Found"
         # UNSUPPORTED METHODS
 
         else:
