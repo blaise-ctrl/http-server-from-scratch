@@ -7,37 +7,41 @@ Building an HTTP/1.1 server from scratch using Python sockets.
 * TCP server
 * HTTP response generation
 * HTTP request parsing
+* HTTP header parsing
 * Basic routing
+* Method-based routing (GET)
+* Dynamic route handling (`/echo/<text>`)
+* User-Agent extraction
+* File serving (`/files/<filename>`)
 * 404 handling
 * Content-Length header
 * Content-Type header
-* Dynamic route handling (`/echo/<text>`)
-* HTTP header parsing
-* User-Agent extraction
+* File I/O using Python
 
 ## Current Routes
 
-| Route           | Description               |
-| --------------- | ------------------------- |
-| `/`             | Welcome page              |
-| `/hello`        | Returns greeting          |
-| `/about`        | About the server          |
-| `/echo/<text>`  | Returns supplied text     |
-| `/user-agent`   | Returns User-Agent header |
-| Any other route | 404 Not Found             |
+| Route               | Description                |
+| ------------------- | -------------------------- |
+| `/`                 | Welcome page               |
+| `/hello`            | Returns greeting           |
+| `/about`            | About the server           |
+| `/echo/<text>`      | Returns supplied text      |
+| `/user-agent`       | Returns User-Agent header  |
+| `/files/<filename>` | Returns contents of a file |
+| Any other route     | 404 Not Found              |
 
 ## Example
 
 Request:
 
 ```bash
-curl http://127.0.0.1:4221/hello
+curl http://127.0.0.1:4221/files/test.txt
 ```
 
 Response:
 
 ```text
-Hello!
+Hello from a file!
 ```
 
 ## Project Structure
@@ -47,7 +51,9 @@ http-server-from-scratch/
 │
 ├── server.py
 ├── README.md
-└── .gitignore
+├── .gitignore
+└── files/
+    └── test.txt
 ```
 
 ## Development Log
@@ -73,18 +79,27 @@ http-server-from-scratch/
 * Extracted User-Agent header
 * Added `/user-agent` endpoint
 
+### Commit 4 - File Serving
+
+* Added `/files/<filename>` endpoint
+* Implemented file reading using Python file I/O
+* Added FileNotFoundError handling
+* Returned file contents as HTTP response body
+* Refactored routing by HTTP method
+
 ## Technologies Used
 
 * Python
 * Socket Programming
 * HTTP/1.1
+* File I/O
 * Git
 * GitHub
 
 ## Next Steps
 
-* File serving (`/files/<filename>`)
 * POST request handling
+* File creation via POST
 * JSON responses
 * Multithreading
 * Logging
@@ -97,7 +112,10 @@ Through this project I learned:
 * TCP socket programming
 * HTTP request/response structure
 * HTTP headers
+* HTTP status codes
 * URL routing
 * Dynamic route handling
+* File serving
+* Exception handling
 * Git and GitHub workflow
 * Building backend systems without frameworks
