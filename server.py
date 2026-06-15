@@ -15,38 +15,86 @@ def main():
         print(f"Client connected: {address}")
 
         request = client_socket.recv(1024).decode()
+
         print("Raw request:")
         print(request)
-        lines=request.splitlines()
-        user_agent=""
+
+        lines = request.splitlines()
+
+        # Parse request line
+        request_line = lines[0]
+        method, path, version = request_line.split()
+
+        # Parse User-Agent header
+        user_agent = ""
         for line in lines:
             if line.startswith("User-Agent: "):
                 user_agent = line[len("User-Agent: "):]
+
+        print(f"Method: {method}")
+        print(f"Path: {path}")
+        print(f"Version: {version}")
         print(f"User-Agent: {user_agent}")
-        request_line=request.splitlines()[0]
-        method,path,version=request_line.split()
-        print(f"Method:{method}")
-        print(f"Path:{path}")
-        print(f"Version:{version}")
         print("-" * 50)
-        if path == "/":
-            status_line = b"HTTP/1.1 200 OK\r\n"
-            body = b"Welcome to Chris's server!"
-        elif path == "/hello":
-            status_line = b"HTTP/1.1 200 OK\r\n"
-            body = b"Hello!"
-        elif path == "/about":
-            status_line = b"HTTP/1.1 200 OK\r\n"
-            body = b"Built from scratch using Python sockets."
-        elif path.startswith("/echo/"):
-            status_line = b"HTTP/1.1 200 OK\r\n"
-            body=path[6:].encode()
-        elif path == "/user-agent":
-            status_line = b"HTTP/1.1 200 OK\r\n"
-            body=user_agent.encode()
+
+        
+        # GET ROUTES
+        
+        if method == "GET":
+
+            if path == "/":
+                status_line = b"HTTP/1.1 200 OK\r\n"
+                body = b"Welcome to Chris's server!"
+
+            elif path == "/hello":
+                status_line = b"HTTP/1.1 200 OK\r\n"
+                body = b"Hello!"
+
+            elif path == "/about":
+                status_line = b"HTTP/1.1 200 OK\r\n"
+                body = b"Built from scratch using Python sockets."
+
+            elif path.startswith("/echo/"):
+                status_line = b"HTTP/1.1 200 OK\r\n"
+                body = path[len("/echo/"):].encode()
+
+            elif path == "/user-agent":
+                status_line = b"HTTP/1.1 200 OK\r\n"
+                body = user_agent.encode()
+
+            elif path.startswith("/files/"):
+                filename = path[len("/files/"):]
+                filepath = "files/" + filename
+
+                try:
+                    with open(filepath, "r") as f:
+                        content = f.read()
+
+                    status_line = b"HTTP/1.1 200 OK\r\n"
+                    body = content.encode()
+
+                except FileNotFoundError:
+                    status_line = b"HTTP/1.1 404 Not Found\r\n"
+                    body = b"404 Not Found"
+
+            else:
+                status_line = b"HTTP/1.1 404 Not Found\r\n"
+                body = b"404 Not Found"
+
+       
+        # POST ROUTES
+        
+        elif method == "POST":
+
+            status_line = b"HTTP/1.1 501 Not Implemented\r\n"
+            body = b"POST not implemented yet"
+
+        
+        # UNSUPPORTED METHODS
+
         else:
-            status_line = b"HTTP/1.1 404 Not Found\r\n"
-            body = b"404 Not Found"
+            status_line = b"HTTP/1.1 405 Method Not Allowed\r\n"
+            body = b"Method Not Allowed"
 
         response = (
             status_line
@@ -57,9 +105,12 @@ def main():
             + b"\r\n"
             + body
         )
+
         client_socket.sendall(response)
 
         client_socket.shutdown(socket.SHUT_WR)
         client_socket.close()
+
+
 if __name__ == "__main__":
     main()
