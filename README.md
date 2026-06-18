@@ -19,10 +19,13 @@ Building a multithreaded HTTP/1.1 server from scratch using Python sockets witho
 * Multithreaded client handling
 * Thread-safe request counting
 * Thread-safe logging
-* Dynamic Content-Type handling
+* Dynamic MIME type detection
+* Request timing metrics
+* Graceful server shutdown
 * Content-Length header generation
 * HTTP status code handling
 * Exception handling
+* Refactored server architecture
 * Git version control
 
 ## Current Routes
@@ -89,7 +92,9 @@ Response:
 {
     "status": "running",
     "server": "Chris HTTP Server",
-    "requests_served": 42
+    "requests_served": 42,
+    "active_threads": 3,
+    "uptime_seconds": 1248
 }
 ```
 
@@ -107,6 +112,23 @@ http-server-from-scratch/
     ├── test.html
     └── test.json
 ```
+
+## Architecture
+
+```text
+main()
+│
+├── handle_client()
+│
+├── parse_request()
+├── handle_get()
+├── handle_post()
+├── build_response()
+├── send_response()
+└── log_request()
+```
+
+The server follows a modular architecture that separates request parsing, routing, response generation, logging, and client handling into dedicated functions for improved maintainability and extensibility.
 
 ## Development Log
 
@@ -153,13 +175,17 @@ http-server-from-scratch/
 * Added request logging with timestamps
 * Added thread-safe request counters
 
-### Commit 7 - JSON API and Content Handling
+### Commit 7 - Server Monitoring and Architecture Refactor
 
 * Added JSON status endpoint
 * Implemented request statistics API
-* Added dynamic Content-Type handling
-* Improved response generation
-* Refactored server architecture
+* Added active thread monitoring
+* Added server uptime monitoring
+* Added request timing metrics
+* Implemented MIME type detection
+* Added graceful shutdown handling
+* Refactored server into modular functions
+* Improved code maintainability and readability
 
 ## Technologies Used
 
@@ -186,6 +212,8 @@ http-server-from-scratch/
 * REST-style APIs
 * JSON Serialization
 * Logging Systems
+* MIME Type Detection
+* Performance Monitoring
 * Software Architecture
 
 ## Learning Outcomes
@@ -201,25 +229,32 @@ Through this project I learned:
 * How REST APIs return structured JSON data
 * How backend systems persist data using files
 * How logging systems track server activity
+* How MIME types are used by web servers
+* How server monitoring and metrics work
 * How to organize and refactor growing codebases
 * How to use Git and GitHub effectively
+
+## Sample Log Output
+
+```text
+2026-06-18 01:20:30 GET /hello -> 200 (1.72 ms)
+2026-06-18 01:20:35 GET /files/test.txt -> 200 (2.15 ms)
+2026-06-18 01:20:40 POST /files/test.txt -> 201 (3.41 ms)
+2026-06-18 01:20:45 GET /api/status -> 200 (1.95 ms)
+```
 
 ## Future Enhancements
 
 * Persistent connections (Keep-Alive)
 * Static website hosting
-* Request compression
+* Binary file serving
 * Configuration files
 * Unit testing
 * Docker support
 * HTTPS/TLS support
 * Additional HTTP methods (PUT, DELETE)
+* Request compression
+* Connection pooling
 
-## Sample Log Output
-
-```text
-2026-06-17 14:22:01 GET /hello -> 200
-2026-06-17 14:22:05 GET /about -> 200
-2026-06-17 14:22:10 POST /files/test.txt -> 201
-2026-06-17 14:22:15 GET /api/status -> 200
+```
 ```
